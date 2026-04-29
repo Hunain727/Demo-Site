@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ProGrade Informatics — Digital Agency</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --black:#060608;--white:#f5f5f0;--accent:#c8ff00;--accent2:#ff5533;
+  --gray:#111114;--gray2:#1c1c20;--gray3:#2a2a30;--muted:rgba(245,245,240,0.45);
+  --border:rgba(245,245,240,0.07);--font-h:'Syne',sans-serif;--font-b:'DM Sans',sans-serif;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--black);color:var(--white);font-family:var(--font-b);overflow-x:hidden;cursor:none;}
+
+/* PRELOADER */
+#loader-wrapper{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--black);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10000;transition:opacity 0.8s cubic-bezier(0.22,1,0.36,1),visibility 0.8s;}
+#loader-wrapper.loaded{opacity:0;visibility:hidden;pointer-events:none;}
+.loader-logo{font-family:var(--font-h);font-size:32px;font-weight:800;letter-spacing:-1px;margin-bottom:24px;opacity:0;transform:translateY(20px);animation:loadIn 0.6s ease forwards;}
+.loader-logo span{color:var(--accent);}
+.loader-bar{width:200px;height:2px;background:var(--border);position:relative;overflow:hidden;border-radius:4px;}
+.loader-bar::after{content:'';position:absolute;left:-100%;top:0;width:100%;height:100%;background:var(--accent);animation:loadBar 1.5s cubic-bezier(0.65,0,0.35,1) infinite;}
+@keyframes loadIn{to{opacity:1;transform:translateY(0);}}
+@keyframes loadBar{0%{left:-100%;}50%{left:0;}100%{left:100%;}}
+
+/* CUSTOM CURSOR */
+#cursor{position:fixed;width:10px;height:10px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:9999;transition:transform 0.15s ease;mix-blend-mode:difference;}
+#cursor-ring{position:fixed;width:38px;height:38px;border:1px solid rgba(200,255,0,0.5);border-radius:50%;pointer-events:none;z-index:9998;transition:all 0.12s ease;mix-blend-mode:normal;}
+body:hover #cursor{opacity:1;}
+
+/* NOISE OVERLAY */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9990;opacity:0.4;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:500;padding:0 60px;display:flex;align-items:center;justify-content:space-between;height:72px;transition:background 0.4s,border-color 0.4s;border-bottom:1px solid transparent;background:rgba(6,6,8,0.7);backdrop-filter:blur(10px);}
+nav.scrolled{background:rgba(6,6,8,0.92);backdrop-filter:blur(24px);border-color:var(--border);}
+.logo{font-family:var(--font-h);font-size:20px;font-weight:800;letter-spacing:-0.5px;cursor:pointer;transition:opacity 0.2s;}
+.logo:hover{opacity:0.75;}
+.logo span{color:var(--accent);}
+.logo sub{font-size:10px;font-weight:400;color:var(--muted);vertical-align:baseline;margin-left:2px;letter-spacing:1px;}
+.nav-links{display:flex;gap:40px;list-style:none;}
+.nav-links li a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:500;letter-spacing:0.5px;transition:color 0.2s;position:relative;padding-bottom:2px;cursor:pointer;}
+.nav-links li a::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform 0.3s;}
+.nav-links li a:hover,.nav-links li a.active{color:var(--white);}
+.nav-links li a.active::after,.nav-links li a:hover::after{transform:scaleX(1);}
+.nav-cta{background:var(--accent);color:var(--black);padding:10px 24px;border-radius:50px;font-size:13px;font-weight:700;font-family:var(--font-h);cursor:pointer;transition:transform 0.2s,box-shadow 0.3s;border:none;letter-spacing:0.3px;}
+.nav-cta:hover{transform:scale(1.05);box-shadow:0 8px 32px rgba(200,255,0,0.35);}
+/* HAMBURGER TOGGLE */
+.menu-toggle{display:none;flex-direction:column;gap:6px;cursor:pointer;z-index:600;padding:10px;margin-left:15px;}
+.menu-toggle span{width:26px;height:2px;background:var(--white);transition:0.3s;border-radius:2px;}
+.menu-toggle.active span:nth-child(1){transform:translateY(8px) rotate(45deg);}
+.menu-toggle.active span:nth-child(2){opacity:0;}
+.menu-toggle.active span:nth-child(3){transform:translateY(-8px) rotate(-45deg);}
+
+/* PAGE SYSTEM */
+.page{display:none;min-height:100vh;animation:fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) both;}
+.page.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px);}to{opacity:1;transform:translateY(0);}}
+
+/* ============================================================
+   HOME PAGE
+   ============================================================ */
+#page-home{}
+.hero{
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  padding:100px 60px 60px;
+  position:relative;
+  overflow:hidden;
+  /* Interactive background logic */
+  background: radial-gradient(800px circle at var(--m-x, 50%) var(--m-y, 50%), rgba(200,255,0,0.04), transparent 50%);
+}
+.hero-orb{position:absolute;border-radius:50%;filter:blur(120px);pointer-events:none;}
+.hero-orb-1{width:600px;height:600px;background:rgba(200,255,0,0.08);top:-100px;right:-100px;}
+.hero-orb-2{width:400px;height:400px;background:rgba(255,85,51,0.06);bottom:-50px;left:-50px;}
+.hero-inner{max-width:1200px;width:100%;display:grid;grid-template-columns:1fr auto;gap:80px;align-items:center;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:10px;margin-bottom:32px;}
+.hero-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;animation:breathe 2.5s ease infinite;}
+@keyframes breathe{0%,100%{box-shadow:0 0 0 0 rgba(200,255,0,0.6);}50%{box-shadow:0 0 0 8px rgba(200,255,0,0);}}
+.hero-eyebrow span{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent);}
+.hero-h1{font-family:var(--font-h);font-size:clamp(52px,6.5vw,92px);font-weight:800;line-height:0.95;letter-spacing:-3px;margin-bottom:28px;}
+.hero-h1 em{font-style:italic;font-weight:300;color:var(--muted);letter-spacing:-1px;}
+.hero-h1 .hi{color:var(--accent);}
+.hero-sub{font-size:17px;color:var(--muted);line-height:1.75;max-width:520px;margin-bottom:48px;}
+.hero-actions{display:flex;gap:16px;align-items:center;}
+.btn-acc{background:var(--accent);color:var(--black);padding:15px 36px;border-radius:60px;font-weight:700;font-family:var(--font-h);font-size:14px;cursor:pointer;border:none;transition:transform 0.2s,box-shadow 0.3s;letter-spacing:0.3px;}
+.btn-acc:hover{transform:translateY(-3px);box-shadow:0 16px 48px rgba(200,255,0,0.35);}
+.btn-out{background:transparent;color:var(--white);padding:15px 36px;border-radius:60px;font-size:14px;font-weight:500;cursor:pointer;border:1px solid rgba(245,245,240,0.2);transition:border-color 0.2s,background 0.2s;}
+.btn-out:hover{border-color:rgba(245,245,240,0.5);background:rgba(245,245,240,0.05);}
+.hero-ticker{width:180px;display:flex;flex-direction:column;gap:16px;}
+.ticker-card{background:var(--gray2);border:1px solid var(--border);border-radius:16px;padding:20px;text-align:center;transition:transform 0.3s,border-color 0.3s;}
+.ticker-card:hover{transform:scale(1.04);border-color:rgba(200,255,0,0.3);}
+.ticker-num{font-family:var(--font-h);font-size:36px;font-weight:800;color:var(--accent);line-height:1;}
+.ticker-lbl{font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:0.5px;}
+.hero-scroll{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0.4;}
+.hero-scroll span{font-size:11px;letter-spacing:2px;text-transform:uppercase;}
+.scroll-line{width:1px;height:48px;background:linear-gradient(to bottom,var(--white),transparent);animation:scrollAnim 1.8s ease infinite;}
+@keyframes scrollAnim{0%{transform:scaleY(0);transform-origin:top;}50%{transform:scaleY(1);transform-origin:top;}51%{transform-origin:bottom;}100%{transform:scaleY(0);transform-origin:bottom;}}
+
+/* marquee */
+.marquee-wrap{overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:18px 0;background:var(--gray);}
+.marquee-track{display:flex;gap:0;white-space:nowrap;animation:marquee 28s linear infinite;}
+.marquee-item{padding:0 48px;font-family:var(--font-h);font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:16px;}
+.marquee-item span{color:var(--accent);}
+@keyframes marquee{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+
+/* home features strip */
+.home-features{padding:100px 60px;max-width:1300px;margin:0 auto;}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--border);margin-top:64px;}
+.feat-card{background:var(--gray);padding:44px 36px;position:relative;overflow:hidden;transition:background 0.3s;}
+.feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform 0.4s cubic-bezier(0.22,1,0.36,1);}
+.feat-card:hover{background:var(--gray2);}
+.feat-card:hover::before{transform:scaleX(1);}
+.feat-icon{font-size:32px;margin-bottom:24px;display:block;}
+.feat-name{font-family:var(--font-h);font-size:22px;font-weight:700;margin-bottom:12px;}
+.feat-desc{font-size:14px;color:var(--muted);line-height:1.7;}
+.feat-arrow{position:absolute;bottom:28px;right:28px;width:36px;height:36px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted);transition:background 0.3s,border-color 0.3s,color 0.3s;}
+.feat-card:hover .feat-arrow{background:var(--accent);border-color:var(--accent);color:var(--black);}
+
+/* NEW HOME SECTIONS STYLES */
+.home-partners{padding:60px 0;border-top:1px solid var(--border);background:var(--black);opacity:0.6;}
+.partner-grid{display:flex;justify-content:space-around;align-items:center;flex-wrap:wrap;gap:40px;max-width:1200px;margin:0 auto;filter:grayscale(1);}
+.partner-grid span{font-family:var(--font-h);font-weight:800;font-size:20px;letter-spacing:1px;color:var(--muted);}
+.home-industries{padding:100px 60px;background:var(--gray2);}
+.ind-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:50px;}
+.ind-card{background:var(--gray);padding:40px 30px;border-radius:24px;border:1px solid var(--border);transition:all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
+.ind-card:hover{border-color:var(--accent);transform:translateY(-10px);box-shadow:0 20px 40px rgba(0,0,0,0.4), 0 0 20px rgba(200,255,0,0.1);}
+.ind-card h3{font-family:var(--font-h);font-size:20px;margin-bottom:15px;color:var(--white);}
+.ind-card p{font-size:14px;color:var(--muted);line-height:1.6;}
+
+/* ============================================================
+   SERVICES PAGE
+   ============================================================ */
+#page-services{}
+.page-hero{
+  padding:140px 60px 80px;
+  max-width:1300px;
+  margin:0 auto;
+  position:relative;
+  background: radial-gradient(600px circle at var(--m-x, 50%) var(--m-y, 50%), rgba(200,255,0,0.05), transparent 60%);
+}
+.page-label{display:inline-block;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:20px;}
+.page-h{font-family:var(--font-h);font-size:clamp(40px,5vw,72px);font-weight:800;letter-spacing:-2px;line-height:1.05;margin-bottom:20px;}
+.page-sub{font-size:17px;color:var(--muted);max-width:560px;line-height:1.7;}
+.services-section{padding:0 60px 100px;max-width:1300px;margin:0 auto;}
+.srv-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;}
+.srv-card{background:var(--gray);border:1px solid var(--border);border-radius:24px;padding:44px;position:relative;overflow:hidden;transition:all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
+.srv-card:hover{border-color:var(--accent);transform:translateY(-10px);box-shadow:0 25px 50px rgba(0,0,0,0.5), 0 0 30px rgba(200,255,0,0.05);}
+.srv-num{position:absolute;top:28px;right:28px;font-family:var(--font-h);font-size:64px;font-weight:800;color:rgba(200,255,0,0.06);line-height:1;}
+.srv-icon{width:60px;height:60px;background:rgba(200,255,0,0.1);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:28px;border:1px solid rgba(200,255,0,0.15);}
+.srv-name{font-family:var(--font-h);font-size:24px;font-weight:700;margin-bottom:14px;}
+.srv-desc{font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:24px;}
+.srv-tags{display:flex;flex-wrap:wrap;gap:8px;}
+.stag{background:rgba(245,245,240,0.06);border:1px solid var(--border);border-radius:50px;padding:5px 14px;font-size:11px;color:rgba(245,245,240,0.5);font-weight:500;letter-spacing:0.5px;}
+.srv-divider{margin:60px 0;height:1px;background:linear-gradient(to right,transparent,var(--border) 30%,var(--border) 70%,transparent);}
+.tech-stack{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+.tech-item{background:var(--gray2);border:1px solid var(--border);border-radius:16px;padding:24px;text-align:center;transition:all 0.3s ease;}
+.tech-item:hover{border-color:var(--accent);transform:scale(1.05);background:var(--gray3);}
+.tech-icon{font-size:28px;margin-bottom:10px;display:block;}
+.tech-name{font-size:13px;font-weight:600;}
+
+/* ============================================================
+   PRICING PAGE
+   ============================================================ */
+#page-pricing{}
+.pricing-section{padding:0 60px 100px;max-width:1200px;margin:0 auto;}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:64px;}
+.p-card{background:var(--gray);border:1px solid var(--border);border-radius:28px;padding:44px 36px;position:relative;transition:all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
+.p-card:hover{transform:translateY(-20px) scale(1.02);box-shadow:0 40px 80px rgba(0,0,0,0.8);}
+.p-card:not(.hot):hover{border-color:var(--accent);box-shadow:0 40px 80px rgba(0,0,0,0.8), 0 0 30px rgba(200,255,0,0.1);}
+.p-card.hot{background:var(--accent);border-color:var(--accent);}
+.p-badge{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--accent2);color:var(--white);font-size:10px;font-weight:700;padding:5px 16px;border-radius:50px;letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap;}
+.p-tier{font-family:var(--font-h);font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:28px;}
+.p-card.hot .p-tier{color:rgba(0,0,0,0.5);}
+.p-price{font-family:var(--font-h);font-size:56px;font-weight:800;line-height:1;margin-bottom:6px;}
+.p-card.hot .p-price,.p-card.hot .p-per,.p-card.hot .p-feat{color:var(--black);}
+.p-per{font-size:13px;color:var(--muted);margin-bottom:36px;}
+.p-feats{list-style:none;display:flex;flex-direction:column;gap:14px;margin-bottom:44px;}
+.p-feat{font-size:14px;color:rgba(245,245,240,0.65);display:flex;align-items:flex-start;gap:10px;line-height:1.5;transition:all 0.3s ease;}
+.p-card:hover .p-feat{transform:translateX(8px);color:var(--white);}
+.p-card.hot:hover .p-feat{color:var(--black);}
+.p-feat::before{content:'';width:5px;height:5px;background:var(--accent);border-radius:50%;flex-shrink:0;margin-top:7px;transition:transform 0.3s ease;}
+.p-card:hover .p-feat::before{transform:scale(1.5);}
+.p-card.hot .p-feat::before{background:var(--black);}
+.p-btn{width:100%;padding:14px;border-radius:60px;font-weight:700;font-family:var(--font-h);font-size:14px;cursor:pointer;transition:0.25s;border:none;letter-spacing:0.3px;}
+.p-btn-ghost{background:rgba(245,245,240,0.07);color:var(--white);border:1px solid var(--border);}
+.p-btn-ghost:hover{background:rgba(245,245,240,0.12);}
+.p-btn-dark{background:var(--black);color:var(--accent);}
+.p-btn-dark:hover{background:#0f0f0f;}
+.compare-wrap{margin-top:80px;}
+.compare-title{font-family:var(--font-h);font-size:28px;font-weight:700;margin-bottom:32px;letter-spacing:-0.5px;}
+.compare-table{width:100%;border-collapse:collapse;}
+.compare-table th{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding:14px 20px;text-align:left;border-bottom:1px solid var(--border);}
+.compare-table td{padding:14px 20px;font-size:14px;border-bottom:1px solid var(--border);color:rgba(245,245,240,0.75);}
+.compare-table tr:last-child td{border-bottom:none;}
+.compare-table tr:hover td{background:var(--gray2);}
+.chk{color:var(--accent);font-weight:700;font-size:16px;}
+.x{color:rgba(245,245,240,0.2);}
+
+/* ============================================================
+   WORK PAGE
+   ============================================================ */
+#page-work{}
+.work-section{padding:0 60px 100px;max-width:1300px;margin:0 auto;}
+.work-filter{display:flex;gap:12px;margin-bottom:48px;flex-wrap:wrap;}
+.filter-btn{background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:50px;padding:8px 20px;font-size:13px;font-weight:500;cursor:pointer;transition:0.2s;font-family:var(--font-b);}
+.filter-btn:hover,.filter-btn.active{background:var(--accent);color:var(--black);border-color:var(--accent);}
+.work-masonry{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.w-item{border-radius:20px;overflow:hidden;position:relative;background:var(--gray2);cursor:pointer;transition:all 0.5s cubic-bezier(0.22, 1, 0.36, 1);}
+.w-item:hover{transform:translateY(-10px) scale(1.03);box-shadow:0 30px 60px rgba(0,0,0,0.5);}
+.w-item:nth-child(1),.w-item:nth-child(4){grid-column:span 2;}
+.w-visual{aspect-ratio:16/10;display:flex;align-items:center;justify-content:center;font-size:72px;position:relative;overflow:hidden;}
+.w-item:nth-child(1) .w-visual,.w-item:nth-child(4) .w-visual{aspect-ratio:21/9;}
+.w-grad{position:absolute;inset:0;background:linear-gradient(160deg,rgba(6,6,8,0) 0%,rgba(6,6,8,0.85) 100%);transition:opacity 0.3s;}
+.w-item:hover .w-grad{opacity:0.9;}
+.w-meta{position:absolute;bottom:0;left:0;right:0;padding:24px 28px;}
+.w-cat{font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+.w-title{font-family:var(--font-h);font-size:20px;font-weight:700;}
+.w-emoji{font-size:80px;opacity:0.12;transition:opacity 0.3s,transform 0.4s;}
+.w-item:hover .w-emoji{opacity:0.22;transform:scale(1.1);}
+.work-cta{margin-top:60px;text-align:center;}
+.work-cta p{font-size:16px;color:var(--muted);margin-bottom:20px;}
+
+/* ============================================================
+   PROCESS PAGE
+   ============================================================ */
+#page-process{}
+.process-section{padding:0 60px 100px;max-width:1200px;margin:0 auto;}
+.process-steps-wrap{margin-top:64px;}
+.proc-step{display:grid;grid-template-columns:100px 1fr;gap:0;align-items:start;position:relative;margin-bottom:0;}
+.proc-step:not(:last-child)::after{content:'';position:absolute;left:49px;top:72px;bottom:-1px;width:1px;background:var(--border);}
+.proc-num-col{display:flex;flex-direction:column;align-items:center;padding-top:4px;}
+.proc-circle{width:72px;height:72px;border-radius:50%;background:var(--gray2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--font-h);font-size:22px;font-weight:800;color:var(--accent);flex-shrink:0;position:relative;z-index:1;transition:background 0.3s,border-color 0.3s;}
+.proc-step:hover .proc-circle{background:rgba(200,255,0,0.1);border-color:rgba(200,255,0,0.4);}
+.proc-content{background:var(--gray);border:1px solid var(--border);border-radius:20px;padding:36px 44px;margin-left:28px;margin-bottom:20px;transition:border-color 0.3s,transform 0.3s;}
+.proc-step:hover .proc-content{border-color:var(--accent);transform:translateX(10px);box-shadow:0 10px 30px rgba(0,0,0,0.3);}
+.proc-name{font-family:var(--font-h);font-size:24px;font-weight:700;margin-bottom:10px;}
+.proc-desc{font-size:15px;color:var(--muted);line-height:1.75;margin-bottom:20px;}
+.proc-deliverables{display:flex;gap:8px;flex-wrap:wrap;}
+.deliv{background:rgba(200,255,0,0.08);border:1px solid rgba(200,255,0,0.15);border-radius:50px;padding:5px 14px;font-size:11px;color:var(--accent);font-weight:600;letter-spacing:0.5px;}
+.faq-section{padding:80px 60px 100px;max-width:1200px;margin:0 auto;border-top:1px solid var(--border);}
+.faq-item{border-bottom:1px solid var(--border);overflow:hidden;}
+.faq-q{padding:24px 0;font-size:16px;font-weight:500;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:color 0.2s;}
+.faq-q:hover{color:var(--accent);}
+.faq-icon{font-size:20px;color:var(--accent);transition:transform 0.3s;flex-shrink:0;}
+.faq-a{max-height:0;overflow:hidden;transition:max-height 0.4s cubic-bezier(0.22,1,0.36,1),padding 0.3s;}
+.faq-a.open{max-height:300px;padding-bottom:24px;}
+.faq-a p{font-size:14px;color:var(--muted);line-height:1.75;}
+
+/* ============================================================
+   CLIENTS PAGE
+   ============================================================ */
+#page-clients{}
+.clients-section{padding:0 60px 100px;max-width:1300px;margin:0 auto;}
+.logos-wrap{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);margin-top:64px;margin-bottom:80px;}
+.logo-box{background:var(--gray);padding:36px 24px;display:flex;align-items:center;justify-content:center;transition:background 0.3s;}
+.logo-box:hover{background:var(--gray2);}
+.logo-name{font-family:var(--font-h);font-size:18px;font-weight:800;color:rgba(245,245,240,0.15);letter-spacing:-0.5px;transition:color 0.3s;}
+.logo-box:hover .logo-name{color:rgba(245,245,240,0.4);}
+.reviews-section{}
+.reviews-label{font-family:var(--font-h);font-size:32px;font-weight:700;margin-bottom:36px;letter-spacing:-0.5px;}
+.rev-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+.rev-card{background:var(--gray);border:1px solid var(--border);border-radius:24px;padding:36px;transition:all 0.4s ease;}
+.rev-card:hover{border-color:var(--accent);transform:translateY(-10px);box-shadow:0 20px 40px rgba(0,0,0,0.4);}
+.rev-stars{color:var(--accent);letter-spacing:2px;font-size:14px;margin-bottom:18px;}
+.rev-text{font-size:15px;color:rgba(245,245,240,0.7);line-height:1.75;margin-bottom:28px;font-style:italic;}
+.rev-author{display:flex;align-items:center;gap:14px;}
+.rev-av{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--accent),rgba(200,255,0,0.4));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:var(--black);flex-shrink:0;}
+.rev-name{font-weight:600;font-size:14px;margin-bottom:2px;}
+.rev-role{font-size:12px;color:var(--muted);}
+.stats-band{margin-top:80px;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);}
+.stat-cell{background:var(--gray);padding:44px;text-align:center;}
+.stat-big{font-family:var(--font-h);font-size:52px;font-weight:800;color:var(--accent);line-height:1;margin-bottom:8px;}
+.stat-txt{font-size:13px;color:var(--muted);}
+
+/* ============================================================
+   CONTACT / CTA SECTION (shared footer)
+   ============================================================ */
+.cta-band{background:var(--gray);border-top:1px solid var(--border);padding:100px 60px;text-align:center;position:relative;overflow:hidden;}
+.cta-band::before{content:'';position:absolute;width:500px;height:500px;border-radius:50%;background:rgba(200,255,0,0.05);top:-200px;left:50%;transform:translateX(-50%);filter:blur(80px);}
+.cta-h{font-family:var(--font-h);font-size:clamp(36px,4vw,60px);font-weight:800;letter-spacing:-2px;margin-bottom:16px;position:relative;}
+.cta-sub{font-size:17px;color:var(--muted);margin-bottom:40px;position:relative;}
+.cta-email{font-size:22px;font-weight:700;color:var(--accent);text-decoration:none;position:relative;display:inline-block;margin-bottom:40px;}
+.cta-email::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:1px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform 0.3s;}
+.cta-email:hover::after{transform:scaleX(1);}
+
+/* FOOTER */
+footer{background:var(--black);border-top:1px solid var(--border);padding:100px 60px 60px;position:relative;z-index:10;}
+.foot-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px;margin-bottom:80px;}
+@media(max-width:1024px){.foot-grid{grid-template-columns:1fr 1fr; gap:40px;}}
+@media(max-width:640px){.foot-grid{grid-template-columns:1fr;}}
+.foot-brand .logo{font-size:28px; margin-bottom:20px; display:inline-block;}
+.foot-brand .logo sub{font-size:13px;}
+.foot-motto{font-size:15px;color:var(--muted);line-height:1.7;max-width:340px;}
+.foot-col h4{font-family:var(--font-h);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--white);margin-bottom:28px;}
+.foot-list{list-style:none;display:flex;flex-direction:column;gap:14px;}
+.foot-list a{font-size:14px;color:var(--muted);text-decoration:none;transition:0.2s;cursor:pointer;}
+.foot-list a:hover{color:var(--accent);}
+.foot-contact-info{margin-top:24px;font-size:14px;color:var(--muted);line-height:2;}
+.foot-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:24px;border-top:1px solid var(--border);}
+.foot-copy{font-size:12px;color:var(--muted);}
+.foot-socials{display:flex;gap:12px;}
+.soc{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--muted);text-decoration:none;transition:0.2s;}
+.soc:hover{border-color:var(--accent);color:var(--accent);}
+
+/* SCROLL REVEAL */
+.reveal{opacity:0;transform:translateY(32px);transition:opacity 0.7s cubic-bezier(0.22,1,0.36,1),transform 0.7s cubic-bezier(0.22,1,0.36,1);}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.reveal-d1{transition-delay:0.1s;}
+.reveal-d2{transition-delay:0.2s;}
+.reveal-d3{transition-delay:0.3s;}
+.reveal-d4{transition-delay:0.4s;}
+.reveal-d5{transition-delay:0.5s;}
+
+/* ==================== MEDIA QUERIES ==================== */
+
+/* Tablets & Small Laptops (max-width: 1024px) */
+@media (max-width: 1024px) {
+  nav { padding: 0 30px; }
+  .nav-links { gap: 20px; }
+  .hero { padding: 120px 30px 60px; }
+  .hero-inner { grid-template-columns: 1fr; gap: 40px; text-align: center; }
+  .hero-sub { margin-left: auto; margin-right: auto; }
+  .hero-actions { justify-content: center; }
+  .hero-ticker { width: 100%; flex-direction: row; justify-content: center; flex-wrap: wrap; }
+  .ticker-card { flex: 1; min-width: 140px; }
+  
+  .feat-grid { grid-template-columns: repeat(2, 1fr); }
+  .ind-grid { grid-template-columns: repeat(2, 1fr); }
+  .srv-grid { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: repeat(2, 1fr); max-width: none; }
+  .p-card:last-child { grid-column: span 2; max-width: 500px; margin: 0 auto; }
+  .work-masonry { grid-template-columns: repeat(2, 1fr); }
+  .rev-grid { grid-template-columns: repeat(2, 1fr); }
+  .stats-band { grid-template-columns: repeat(2, 1fr); }
+  
+  .home-features, .services-section, .pricing-section, .work-section, .process-section, .clients-section, .page-hero { padding-left: 30px; padding-right: 30px; }
+}
+
+/* Mobile Devices (max-width: 768px) */
+@media (max-width: 768px) {
+  .menu-toggle{display:flex;}
+  .nav-links { 
+    position:fixed;top:0;right:-100%;width:100%;height:100vh;background:rgba(6,6,8,0.98);backdrop-filter:blur(24px);
+    display:flex;flex-direction:column;justify-content:center;align-items:center;gap:35px;transition:0.5s cubic-bezier(0.22,1,0.36,1);z-index:550;
+  }
+  .nav-links.open{right:0;}
+  .nav-links li a{font-size:24px;font-family:var(--font-h);font-weight:700;}
+  .nav-cta { display: none; } /* Hide Get Started button on mobile */
+  nav { backdrop-filter: blur(5px); } /* Less blur on mobile */
+  nav.scrolled { backdrop-filter: blur(15px); } /* Less blur when scrolled on mobile */
+  
+  .hero-h1 { font-size: 48px; }
+  .feat-grid { grid-template-columns: 1fr; }
+  .ind-grid { grid-template-columns: 1fr; }
+  .tech-stack { grid-template-columns: repeat(2, 1fr); }
+
+  /* Pricing specific mobile fixes */
+  .pricing-grid { grid-template-columns: 1fr; }
+  .p-card:last-child { grid-column: span 1; width: 100%; }
+  .compare-wrap { overflow-x: auto; padding-bottom: 20px; -webkit-overflow-scrolling: touch; }
+  .compare-table { min-width: 600px; }
+  
+  .proc-step { grid-template-columns: 1fr; }
+  .proc-num-col { margin-bottom: 20px; align-items: flex-start; }
+  .proc-step:not(:last-child)::after { display: none; }
+  .proc-content { margin-left: 0; }
+  
+  .rev-grid { grid-template-columns: 1fr; }
+  .logos-wrap { grid-template-columns: repeat(2, 1fr); }
+  
+  .cta-band { padding: 60px 20px; }
+  .cta-h { font-size: 32px; }
+  .cta-email { font-size: 18px; }
+}
+
+/* Small Mobile (max-width: 480px) */
+@media (max-width: 480px) {
+  .logo { font-size: 16px; }
+  .hero-h1 { font-size: 40px; }
+  .p-price { font-size: 42px; }
+  .hero-actions { flex-direction: column; width: 100%; }
+  .btn-acc, .btn-out { width: 100%; text-align: center; }
+  
+  .work-masonry { grid-template-columns: 1fr; }
+  .w-item:nth-child(1), .w-item:nth-child(4) { grid-column: span 1; }
+  
+  .stat-cell { padding: 20px; }
+  .stat-big { font-size: 36px; }
+
+  /* Clients & Contact Responsive Fixes */
+  .stats-band { grid-template-columns: 1fr; }
+  .logos-wrap { grid-template-columns: 1fr; }
+  .contact-email-txt { font-size: 19px !important; word-break: break-all; }
+  .contact-tel-txt { font-size: 16px !important; }
+
+  footer { padding: 60px 20px 40px; }
+  .foot-bottom { flex-direction: column; gap: 20px; text-align: center; }
+}
+
+</style>
+</head>
+<body style="overflow: hidden;">
+
+<!-- PRELOADER -->
+<div id="loader-wrapper">
+  <div class="loader-logo">Pro<span>Grade</span></div>
+  <div class="loader-bar"></div>
+</div>
+
+<!-- CURSOR -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <div class="logo" onclick="showPage('home')">Pro<span>Grade</span><sub>Informatics</sub></div>
+  <ul class="nav-links">
+    <li><a onclick="showPage('home')" id="nav-home" class="active">Home</a></li>
+    <li><a onclick="showPage('services')" id="nav-services">Services</a></li>
+    <li><a onclick="showPage('pricing')" id="nav-pricing">Pricing</a></li>
+    <li><a onclick="showPage('work')" id="nav-work">Work</a></li>
+    <li><a onclick="showPage('process')" id="nav-process">Process</a></li>
+    <li><a onclick="showPage('clients')" id="nav-clients">Clients</a></li>
+    <li><a onclick="showPage('contact')" id="nav-contact">Contact</a></li>
+  </ul>
+  <div style="display:flex; align-items:center;">
+    <button class="nav-cta" onclick="showPage('pricing')">Get Started →</button>
+    <div class="menu-toggle" id="menu-toggle">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+
+<!-- ==================== HOME PAGE ==================== -->
+<div id="page-home" class="page active">
+  <section class="hero">
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-inner">
+      <div>
+        <div class="hero-eyebrow">
+          <div class="hero-dot"></div>
+          <span>Available for Projects — 2025</span>
+        </div>
+        <h1 class="hero-h1">
+          We Craft<br/>
+          <span class="hi">Digital</span><br/>
+          <em>Experiences</em>
+        </h1>
+        <p class="hero-sub">ProGrade Informatics is a results-driven IT & digital agency building powerful websites, mobile apps, and brands that help businesses grow at scale.</p>
+        <div class="hero-actions">
+          <button class="btn-acc" onclick="showPage('work')">View Our Work</button>
+          <button class="btn-out" onclick="showPage('services')">Explore Services</button>
+        </div>
+      </div>
+      <div class="hero-ticker">
+        <div class="ticker-card reveal">
+          <div class="ticker-num">150+</div>
+          <div class="ticker-lbl">Projects Done</div>
+        </div>
+        <div class="ticker-card reveal reveal-d1">
+          <div class="ticker-num">8+</div>
+          <div class="ticker-lbl">Years Active</div>
+        </div>
+        <div class="ticker-card reveal reveal-d2">
+          <div class="ticker-num">98%</div>
+          <div class="ticker-lbl">Satisfaction</div>
+        </div>
+        <div class="ticker-card reveal reveal-d3">
+          <div class="ticker-num">40+</div>
+          <div class="ticker-lbl">Expert Team</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-scroll">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <section class="home-partners reveal">
+    <div class="partner-grid">
+      <span>TECHNOVA</span><span>GLOBAL-X</span><span>SILICON-FLOW</span><span>NEXUS-IT</span><span>CORE-BUILD</span>
+    </div>
+  </section>
+
+  <div class="marquee-wrap">
+    <div class="marquee-track" id="marqueeTrack">
+      <div class="marquee-item">Web Development <span>✦</span></div>
+      <div class="marquee-item">Mobile Apps <span>✦</span></div>
+      <div class="marquee-item">UI/UX Design <span>✦</span></div>
+      <div class="marquee-item">Cloud & DevOps <span>✦</span></div>
+      <div class="marquee-item">AI Integration <span>✦</span></div>
+      <div class="marquee-item">Digital Marketing <span>✦</span></div>
+      <div class="marquee-item">E-Commerce <span>✦</span></div>
+      <div class="marquee-item">Cybersecurity <span>✦</span></div>
+      <div class="marquee-item">Web Development <span>✦</span></div>
+      <div class="marquee-item">Mobile Apps <span>✦</span></div>
+      <div class="marquee-item">UI/UX Design <span>✦</span></div>
+      <div class="marquee-item">Cloud & DevOps <span>✦</span></div>
+      <div class="marquee-item">AI Integration <span>✦</span></div>
+      <div class="marquee-item">Digital Marketing <span>✦</span></div>
+      <div class="marquee-item">E-Commerce <span>✦</span></div>
+      <div class="marquee-item">Cybersecurity <span>✦</span></div>
+    </div>
+  </div>
+
+  <div class="home-features">
+    <span class="page-label reveal">Why Choose Us</span>
+    <h2 class="page-h reveal reveal-d1">Built Different,<br/>Delivered Better</h2>
+    <div class="feat-grid">
+      <div class="feat-card reveal">
+        <span class="feat-icon">⚡</span>
+        <div class="feat-name">Lightning Fast</div>
+        <p class="feat-desc">We build performance-first products. Every pixel and line of code is optimized for speed, conversion, and scale.</p>
+        <div class="feat-arrow">→</div>
+      </div>
+      <div class="feat-card reveal reveal-d1">
+        <span class="feat-icon">🎯</span>
+        <div class="feat-name">Results Focused</div>
+        <p class="feat-desc">We don't just build — we strategize. Every decision is tied to your business goals and measurable outcomes.</p>
+        <div class="feat-arrow">→</div>
+      </div>
+      <div class="feat-card reveal reveal-d2">
+        <span class="feat-icon">🔒</span>
+        <div class="feat-name">Enterprise Security</div>
+        <p class="feat-desc">From SSL to penetration testing — security is baked in from day one, not bolted on at the end.</p>
+        <div class="feat-arrow">→</div>
+      </div>
+      <div class="feat-card reveal reveal-d3">
+        <span class="feat-icon">🌍</span>
+        <div class="feat-name">Global Standards</div>
+        <p class="feat-desc">We follow international development standards and best practices across every project we ship.</p>
+        <div class="feat-arrow">→</div>
+      </div>
+      <div class="feat-card reveal reveal-d4">
+        <span class="feat-icon">🤝</span>
+        <div class="feat-name">Agile & Transparent</div>
+        <p class="feat-desc">Weekly updates, live project dashboards, and open communication — you're always in the loop.</p>
+        <div class="feat-arrow">→</div>
+      </div>
+      <div class="feat-card reveal reveal-d5">
+        <span class="feat-icon">♾️</span>
+        <div class="feat-name">Long-Term Support</div>
+        <p class="feat-desc">We're your long-term tech partner — not a one-off vendor. Growth support, maintenance, and scaling included.</p>
+        <div class="feat-arrow">→</div>
+      </div>
+    </div>
+  </div>
+
+  <section class="home-industries reveal">
+    <span class="page-label">Core Expertise</span>
+    <h2 class="page-h">Industries We<br/>Empower</h2>
+    <div class="ind-grid">
+      <div class="ind-card">
+        <h3>Fintech</h3>
+        <p>Building secure digital banking and payment gateways with advanced encryption.</p>
+      </div>
+      <div class="ind-card">
+        <h3>E-Commerce</h3>
+        <p>High-conversion stores designed for speed and seamless user journeys.</p>
+      </div>
+      <div class="ind-card">
+        <h3>Healthcare</h3>
+        <p>Telemedicine platforms and patient management systems for modern clinics.</p>
+      </div>
+      <div class="ind-card">
+        <h3>Education</h3>
+        <p>LMS portals and interactive learning tools for global institutions.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="cta-band">
+    <h2 class="cta-h">Ready to Build Something<br/>Extraordinary?</h2>
+    <p class="cta-sub">Let's talk about your project. No commitment, just clarity.</p>
+    <a href="mailto:hello@progradeinformatics.com" class="cta-email">hello@progradeinformatics.com</a><br/>
+    <button class="btn-acc" onclick="showPage('pricing')" style="margin-top:20px;">See Our Plans →</button>
+  </div>
+</div>
+
+<!-- ==================== SERVICES PAGE ==================== -->
+<div id="page-services" class="page">
+  <div class="page-hero">
+    <span class="page-label reveal">What We Do</span>
+    <h1 class="page-h reveal reveal-d1">Full-Stack IT<br/>Services</h1>
+    <p class="page-sub reveal reveal-d2">From strategy to deployment — we cover every layer of the digital stack so you can focus on what you do best.</p>
+  </div>
+  <div class="services-section">
+    <div class="srv-grid">
+      <div class="srv-card reveal">
+        <div class="srv-num">01</div>
+        <div class="srv-icon">🌐</div>
+        <div class="srv-name">Web Development</div>
+        <p class="srv-desc">We build high-performance, pixel-perfect websites and web applications using the latest frameworks. Every site we deliver is fast, accessible, and built to convert visitors into customers.</p>
+        <div class="srv-tags"><span class="stag">React</span><span class="stag">Next.js</span><span class="stag">Node.js</span><span class="stag">TypeScript</span><span class="stag">PostgreSQL</span></div>
+      </div>
+      <div class="srv-card reveal reveal-d1">
+        <div class="srv-num">02</div>
+        <div class="srv-icon">📱</div>
+        <div class="srv-name">Mobile App Development</div>
+        <p class="srv-desc">Native and cross-platform mobile applications that users love. We design and develop iOS and Android apps with intuitive UX, seamless performance, and scalable backends.</p>
+        <div class="srv-tags"><span class="stag">Flutter</span><span class="stag">React Native</span><span class="stag">Swift</span><span class="stag">Kotlin</span><span class="stag">Firebase</span></div>
+      </div>
+      <div class="srv-card reveal reveal-d2">
+        <div class="srv-num">03</div>
+        <div class="srv-icon">🎨</div>
+        <div class="srv-name">UI/UX Design</div>
+        <p class="srv-desc">Human-centered design that turns complex problems into beautiful, intuitive interfaces. We conduct user research, create wireframes, and deliver pixel-perfect design systems.</p>
+        <div class="srv-tags"><span class="stag">Figma</span><span class="stag">Prototyping</span><span class="stag">Design System</span><span class="stag">User Testing</span></div>
+      </div>
+      <div class="srv-card reveal reveal-d3">
+        <div class="srv-num">04</div>
+        <div class="srv-icon">☁️</div>
+        <div class="srv-name">Cloud & DevOps</div>
+        <p class="srv-desc">Scalable cloud infrastructure, CI/CD pipelines, and DevOps best practices that keep your application reliable, fast, and cost-efficient at any scale.</p>
+        <div class="srv-tags"><span class="stag">AWS</span><span class="stag">Azure</span><span class="stag">Docker</span><span class="stag">Kubernetes</span><span class="stag">Terraform</span></div>
+      </div>
+      <div class="srv-card reveal">
+        <div class="srv-num">05</div>
+        <div class="srv-icon">📈</div>
+        <div class="srv-name">Digital Marketing & SEO</div>
+        <p class="srv-desc">Data-driven growth strategies that boost your online visibility, drive qualified traffic, and maximize your return on ad spend. We grow brands, not just follower counts.</p>
+        <div class="srv-tags"><span class="stag">SEO</span><span class="stag">Google Ads</span><span class="stag">Meta Ads</span><span class="stag">Analytics</span><span class="stag">CRO</span></div>
+      </div>
+      <div class="srv-card reveal reveal-d1">
+        <div class="srv-num">06</div>
+        <div class="srv-icon">🤖</div>
+        <div class="srv-name">AI & Automation</div>
+        <p class="srv-desc">Custom AI integrations, intelligent chatbots, and workflow automation tools that make your business smarter, faster, and more profitable — without hiring more people.</p>
+        <div class="srv-tags"><span class="stag">OpenAI API</span><span class="stag">LangChain</span><span class="stag">Automation</span><span class="stag">ML Models</span></div>
+      </div>
+    </div>
+    <div class="srv-divider"></div>
+    <span class="page-label reveal">Tech Stack</span>
+    <h2 style="font-family:var(--font-h);font-size:32px;font-weight:700;letter-spacing:-1px;margin:12px 0 32px;" class="reveal reveal-d1">Technologies We Use</h2>
+    <div class="tech-stack">
+      <div class="tech-item reveal"><span class="tech-icon">⚛️</span><div class="tech-name">React / Next.js</div></div>
+      <div class="tech-item reveal reveal-d1"><span class="tech-icon">📱</span><div class="tech-name">Flutter</div></div>
+      <div class="tech-item reveal reveal-d2"><span class="tech-icon">🟢</span><div class="tech-name">Node.js</div></div>
+      <div class="tech-item reveal reveal-d3"><span class="tech-icon">🐍</span><div class="tech-name">Python / Django</div></div>
+      <div class="tech-item reveal"><span class="tech-icon">☁️</span><div class="tech-name">AWS / Azure</div></div>
+      <div class="tech-item reveal reveal-d1"><span class="tech-icon">🐳</span><div class="tech-name">Docker / K8s</div></div>
+      <div class="tech-item reveal reveal-d2"><span class="tech-icon">🗄️</span><div class="tech-name">PostgreSQL / MongoDB</div></div>
+      <div class="tech-item reveal reveal-d3"><span class="tech-icon">🤖</span><div class="tech-name">OpenAI / LLMs</div></div>
+    </div>
+  </div>
+  <div class="cta-band">
+    <h2 class="cta-h">Not Sure Which Service<br/>You Need?</h2>
+    <p class="cta-sub">Book a free 30-minute discovery call — we'll figure it out together.</p>
+    <button class="btn-acc" onclick="showPage('pricing')">View Pricing Plans →</button>
+  </div>
+</div>
+
+<!-- ==================== PRICING PAGE ==================== -->
+<div id="page-pricing" class="page">
+  <div class="page-hero">
+    <span class="page-label reveal">Transparent Pricing</span>
+    <h1 class="page-h reveal reveal-d1">Simple Plans,<br/>Real Value</h1>
+    <p class="page-sub reveal reveal-d2">No hidden fees. No confusing tiers. Just clear pricing for exceptional work. All plans include a free consultation.</p>
+  </div>
+  <div class="pricing-section">
+    <div class="pricing-grid">
+      <div class="p-card reveal">
+        <div class="p-tier">Starter</div>
+        <div class="p-price">$499</div>
+        <div class="p-per">one-time payment</div>
+        <ul class="p-feats">
+          <li class="p-feat">Landing Page — up to 5 sections</li>
+          <li class="p-feat">Mobile-responsive design</li>
+          <li class="p-feat">Basic SEO setup</li>
+          <li class="p-feat">Contact form integration</li>
+          <li class="p-feat">2 revision rounds</li>
+          <li class="p-feat">30-day post-launch support</li>
+          <li class="p-feat">Hosting setup guidance</li>
+        </ul>
+        <button class="p-btn p-btn-ghost" onclick="showPage('contact')">Get Started</button>
+      </div>
+      <div class="p-card hot reveal reveal-d1">
+        <div class="p-badge">Most Popular</div>
+        <div class="p-tier">Growth</div>
+        <div class="p-price">$1,499</div>
+        <div class="p-per" style="color:rgba(0,0,0,0.45);">one-time payment</div>
+        <ul class="p-feats">
+          <li class="p-feat">Full website — up to 10 pages</li>
+          <li class="p-feat">Custom UI/UX design</li>
+          <li class="p-feat">CMS integration (WordPress/Sanity)</li>
+          <li class="p-feat">Advanced SEO & speed optimization</li>
+          <li class="p-feat">Analytics & conversion tracking</li>
+          <li class="p-feat">5 revision rounds</li>
+          <li class="p-feat">90-day priority support</li>
+        </ul>
+        <button class="p-btn p-btn-dark" onclick="showPage('contact')">Get Started</button>
+      </div>
+      <div class="p-card reveal reveal-d2">
+        <div class="p-tier">Enterprise</div>
+        <div class="p-price">Custom</div>
+        <div class="p-per">tailored scope</div>
+        <ul class="p-feats">
+          <li class="p-feat">Custom web or mobile application</li>
+          <li class="p-feat">Dedicated project manager</li>
+          <li class="p-feat">API & third-party integrations</li>
+          <li class="p-feat">AI & automation features</li>
+          <li class="p-feat">Performance & security audit</li>
+          <li class="p-feat">Unlimited revision rounds</li>
+          <li class="p-feat">1-year priority support & SLA</li>
+        </ul>
+        <button class="p-btn p-btn-ghost" onclick="showPage('contact')">Contact Us</button>
+      </div>
+    </div>
+    <div class="compare-wrap reveal">
+      <div class="compare-title">Feature Comparison</div>
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Starter</th>
+            <th>Growth</th>
+            <th>Enterprise</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Responsive Design</td><td class="chk">✓</td><td class="chk">✓</td><td class="chk">✓</td></tr>
+          <tr><td>SEO Optimization</td><td>Basic</td><td>Advanced</td><td>Full Audit</td></tr>
+          <tr><td>CMS Integration</td><td class="x">—</td><td class="chk">✓</td><td class="chk">✓</td></tr>
+          <tr><td>Custom Design System</td><td class="x">—</td><td class="chk">✓</td><td class="chk">✓</td></tr>
+          <tr><td>API Integrations</td><td class="x">—</td><td class="x">—</td><td class="chk">✓</td></tr>
+          <tr><td>AI Features</td><td class="x">—</td><td class="x">—</td><td class="chk">✓</td></tr>
+          <tr><td>Dedicated PM</td><td class="x">—</td><td class="x">—</td><td class="chk">✓</td></tr>
+          <tr><td>Post-launch Support</td><td>30 days</td><td>90 days</td><td>1 year SLA</td></tr>
+          <tr><td>Revisions</td><td>2</td><td>5</td><td>Unlimited</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="cta-band">
+    <h2 class="cta-h">Need a Custom Quote?</h2>
+    <p class="cta-sub">Every big project is unique. Let's talk numbers that make sense for both of us.</p>
+    <a href="mailto:hello@progradeinformatics.com" class="cta-email">hello@progradeinformatics.com</a>
+  </div>
+</div>
+
+<!-- ==================== WORK PAGE ==================== -->
+<div id="page-work" class="page">
+  <div class="page-hero">
+    <span class="page-label reveal">Portfolio</span>
+    <h1 class="page-h reveal reveal-d1">Work We're<br/>Proud Of</h1>
+    <p class="page-sub reveal reveal-d2">A selection of projects that delivered measurable results for ambitious clients across industries.</p>
+  </div>
+  <div class="work-section">
+    <div class="work-filter reveal">
+      <button class="filter-btn active" onclick="filterWork(this,'all')">All Projects</button>
+      <button class="filter-btn" onclick="filterWork(this,'web')">Web</button>
+      <button class="filter-btn" onclick="filterWork(this,'mobile')">Mobile</button>
+      <button class="filter-btn" onclick="filterWork(this,'design')">Design</button>
+      <button class="filter-btn" onclick="filterWork(this,'ecom')">E-Commerce</button>
+    </div>
+    <div class="work-masonry" id="workGrid">
+      <div class="w-item reveal" data-cat="ecom">
+        <div class="w-visual"><div class="w-emoji">🛒</div><div class="w-grad"></div></div>
+        <div class="w-meta"><div class="w-cat">E-Commerce</div><div class="w-title">ShopNest — Full E-Commerce Platform</div></div>
+      </div>
+      <div class="w-item reveal reveal-d1" data-cat="mobile">
+        <div class="w-visual"><div class="w-emoji">🏥</div><div class="w-grad"></div></div>
+        <div class="w-meta"><div class="w-cat">Mobile App</div><div class="w-title">MediTrack — Patient Portal</div></div>
+      </div>
+      <div class="w-item reveal reveal-d2" data-cat="web">
+        <div class="w-visual"><div class="w-emoji">🏦</div><div class="w-grad"></div></div>
+        <div class="w-meta"><div class="w-cat">Fintech Web App</div><div class="w-title">PayFlow — Banking Dashboard</div></div>
+      </div>
+      <div class="w-item reveal" data-cat="design">
+        <div class="w-visual"><div class="w-emoji">🎓</div><div class="w-grad"></div></div>
+        <div class="w-meta"><div class="w-cat">EdTech Design</div><div class="w-title">LearnLab — Learning Platform UI</div></div>
+      </div>
+      <div class="w-item reveal reveal-d1" data-cat="web">
+        <div class="w-visual"><div class="w-emoji">🏨</div><div class="w-grad"></div></div>
+        <div class="w-meta"><div class="w-cat">Hospitality</div><div class="w-title">StayNow — Hotel Booking System</div></div>
+      </div>
+      <div class="w-item reveal reveal-d2" data-cat="mobile">
+        <div class="w-visual"><div class="w-emoji">🚗</div><div class="w-grad"></div></div>
+        <div class="w-meta"><div class="w-cat">Mobile App</div><div class="w-title">RideX — Ride-Hailing App</div></div>
+      </div>
+      <div class="w-item reveal" data-cat="ecom">
+        <div class="w-visual"><div class="w-emoji">👗</div><div class="w-grad"></div></div>
+        <div class="w-meta"><div class="w-cat">Fashion E-Commerce</div><div class="w-title">StyleHub — Fashion Store</div></div>
+      </div>
+    </div>
+    <div class="work-cta reveal">
+      <p>Want to see your project in this list?</p>
+      <button class="btn-acc" onclick="showPage('pricing')">Start a Project →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PROCESS PAGE ==================== -->
+<div id="page-process" class="page">
+  <div class="page-hero">
+    <span class="page-label reveal">How We Work</span>
+    <h1 class="page-h reveal reveal-d1">A Process Built<br/>for Results</h1>
+    <p class="page-sub reveal reveal-d2">Our battle-tested 5-step framework ensures every project is delivered on time, on budget, and beyond expectations.</p>
+  </div>
+  <div class="process-section">
+    <div class="process-steps-wrap">
+      <div class="proc-step reveal">
+        <div class="proc-num-col"><div class="proc-circle">01</div></div>
+        <div class="proc-content">
+          <div class="proc-name">Discovery & Research</div>
+          <p class="proc-desc">We start by deeply understanding your business — your goals, users, competitors, and constraints. This phase sets the foundation for everything that follows.</p>
+          <div class="proc-deliverables"><span class="deliv">Project Brief</span><span class="deliv">Competitor Analysis</span><span class="deliv">User Personas</span><span class="deliv">Technical Audit</span></div>
+        </div>
+      </div>
+      <div class="proc-step reveal reveal-d1">
+        <div class="proc-num-col"><div class="proc-circle">02</div></div>
+        <div class="proc-content">
+          <div class="proc-name">Strategy & Planning</div>
+          <p class="proc-desc">We craft a detailed project roadmap — tech stack selection, sprint planning, milestone definitions, and KPIs that align with your business objectives.</p>
+          <div class="proc-deliverables"><span class="deliv">Project Roadmap</span><span class="deliv">Tech Architecture</span><span class="deliv">Sprint Plan</span><span class="deliv">KPI Framework</span></div>
+        </div>
+      </div>
+      <div class="proc-step reveal reveal-d2">
+        <div class="proc-num-col"><div class="proc-circle">03</div></div>
+        <div class="proc-content">
+          <div class="proc-name">Design & Prototype</div>
+          <p class="proc-desc">Our designers craft wireframes, UI mockups, and interactive prototypes. You review and approve before a single line of production code is written.</p>
+          <div class="proc-deliverables"><span class="deliv">Wireframes</span><span class="deliv">UI Mockups</span><span class="deliv">Interactive Prototype</span><span class="deliv">Design System</span></div>
+        </div>
+      </div>
+      <div class="proc-step reveal reveal-d3">
+        <div class="proc-num-col"><div class="proc-circle">04</div></div>
+        <div class="proc-content">
+          <div class="proc-name">Development & QA</div>
+          <p class="proc-desc">Agile development in 2-week sprints with continuous testing. You get weekly demos, a live staging environment, and full transparency throughout.</p>
+          <div class="proc-deliverables"><span class="deliv">Working Code</span><span class="deliv">QA Testing</span><span class="deliv">Weekly Demos</span><span class="deliv">Staging Environment</span></div>
+        </div>
+      </div>
+      <div class="proc-step reveal reveal-d4">
+        <div class="proc-num-col"><div class="proc-circle">05</div></div>
+        <div class="proc-content">
+          <div class="proc-name">Launch & Growth</div>
+          <p class="proc-desc">We handle smooth deployment, performance testing, and monitoring. Post-launch, we stay close — optimizing, scaling, and supporting your product's growth.</p>
+          <div class="proc-deliverables"><span class="deliv">Live Deployment</span><span class="deliv">Performance Report</span><span class="deliv">Training Session</span><span class="deliv">Ongoing Support</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="faq-section">
+    <span class="page-label reveal">FAQ</span>
+    <h2 style="font-family:var(--font-h);font-size:36px;font-weight:700;letter-spacing:-1px;margin:12px 0 40px;" class="reveal reveal-d1">Frequently Asked Questions</h2>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">How long does a typical project take?<span class="faq-icon">+</span></div><div class="faq-a"><p>It depends on scope. A landing page takes 1–2 weeks. A full website typically 4–8 weeks. A custom web or mobile application ranges from 2–6 months. We'll give you a precise timeline in the discovery phase.</p></div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Do you work with clients outside Pakistan?<span class="faq-icon">+</span></div><div class="faq-a"><p>Absolutely. We work with clients across the US, UK, UAE, and beyond. Our team is remote-ready with tools and processes built for seamless international collaboration.</p></div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">What do I need to get started?<span class="faq-icon">+</span></div><div class="faq-a"><p>Just a rough idea of what you want to build! We handle the rest — from scoping and strategy to design and development. The more context you can share, the better, but we're great at working from rough briefs.</p></div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Will I own the code and design files?<span class="faq-icon">+</span></div><div class="faq-a"><p>Yes, 100%. Upon project completion and final payment, all source code, design files, and assets are transferred to you. You own everything outright with no licensing restrictions.</p></div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Can you redesign or improve my existing website?<span class="faq-icon">+</span></div><div class="faq-a"><p>Definitely. We do full redesigns, performance audits, and incremental improvements. We'll assess your current site and recommend the best path forward — sometimes that's a rebuild, sometimes it's targeted enhancements.</p></div></div>
+  </div>
+</div>
+
+<!-- ==================== CLIENTS PAGE ==================== -->
+<div id="page-clients" class="page">
+  <div class="page-hero">
+    <span class="page-label reveal">Trusted By</span>
+    <h1 class="page-h reveal reveal-d1">Clients Who<br/>Believe in Us</h1>
+    <p class="page-sub reveal reveal-d2">We've built partnerships with startups, SMBs, and enterprises across healthcare, fintech, e-commerce, and more.</p>
+  </div>
+  <div class="clients-section">
+    <div class="logos-wrap reveal">
+      <div class="logo-box"><span class="logo-name">TechNova</span></div>
+      <div class="logo-box"><span class="logo-name">BuildRight</span></div>
+      <div class="logo-box"><span class="logo-name">FinEdge</span></div>
+      <div class="logo-box"><span class="logo-name">MediCore</span></div>
+      <div class="logo-box"><span class="logo-name">EduSpark</span></div>
+      <div class="logo-box"><span class="logo-name">SwiftCart</span></div>
+      <div class="logo-box"><span class="logo-name">NovaPay</span></div>
+      <div class="logo-box"><span class="logo-name">UrbanNest</span></div>
+      <div class="logo-box"><span class="logo-name">CloudBridge</span></div>
+      <div class="logo-box"><span class="logo-name">GreenTech</span></div>
+    </div>
+    <div class="stats-band reveal">
+      <div class="stat-cell"><div class="stat-big">150+</div><div class="stat-txt">Projects Delivered</div></div>
+      <div class="stat-cell"><div class="stat-big">40+</div><div class="stat-txt">Happy Clients</div></div>
+      <div class="stat-cell"><div class="stat-big">98%</div><div class="stat-txt">Satisfaction Rate</div></div>
+      <div class="stat-cell"><div class="stat-big">8+</div><div class="stat-txt">Years Experience</div></div>
+    </div>
+    <div class="reviews-section" style="margin-top:80px;">
+      <div class="reviews-label reveal">What Clients Say</div>
+      <div class="rev-grid">
+        <div class="rev-card reveal">
+          <div class="rev-stars">★ ★ ★ ★ ★</div>
+          <p class="rev-text">"ProGrade Informatics transformed our outdated website into a conversion machine. Sales increased by 40% within 3 months of launch. Absolutely outstanding team."</p>
+          <div class="rev-author"><div class="rev-av">AK</div><div><div class="rev-name">Ahmed Khan</div><div class="rev-role">CEO, TechNova</div></div></div>
+        </div>
+        <div class="rev-card reveal reveal-d1">
+          <div class="rev-stars">★ ★ ★ ★ ★</div>
+          <p class="rev-text">"The mobile app they built is flawless. On time, on budget, and exactly what we envisioned. We're already planning our next project with them."</p>
+          <div class="rev-author"><div class="rev-av">SR</div><div><div class="rev-name">Sara Raza</div><div class="rev-role">CTO, MediCore</div></div></div>
+        </div>
+        <div class="rev-card reveal reveal-d2">
+          <div class="rev-stars">★ ★ ★ ★ ★</div>
+          <p class="rev-text">"Professional, creative, and highly skilled. Their UI/UX team delivered designs that our users absolutely love. Highly recommend ProGrade Informatics!"</p>
+          <div class="rev-author"><div class="rev-av">MF</div><div><div class="rev-name">Maria Farooq</div><div class="rev-role">Founder, EduSpark</div></div></div>
+        </div>
+        <div class="rev-card reveal">
+          <div class="rev-stars">★ ★ ★ ★ ★</div>
+          <p class="rev-text">"We needed an enterprise-grade platform in 3 months. ProGrade Informatics delivered it in 10 weeks. Their process is tight and their team genuinely cares."</p>
+          <div class="rev-author"><div class="rev-av">ZA</div><div><div class="rev-name">Zain Ahmad</div><div class="rev-role">COO, FinEdge</div></div></div>
+        </div>
+        <div class="rev-card reveal reveal-d1">
+          <div class="rev-stars">★ ★ ★ ★ ★</div>
+          <p class="rev-text">"Best tech investment we ever made. The ROI from our new e-commerce site paid for the project cost in the first 2 weeks. Incredible work."</p>
+          <div class="rev-author"><div class="rev-av">NK</div><div><div class="rev-name">Nadia Khan</div><div class="rev-role">Director, SwiftCart</div></div></div>
+        </div>
+        <div class="rev-card reveal reveal-d2">
+          <div class="rev-stars">★ ★ ★ ★ ★</div>
+          <p class="rev-text">"Their cloud infrastructure work cut our server costs by 60% while doubling performance. These guys know what they're doing at every level of the stack."</p>
+          <div class="rev-author"><div class="rev-av">BM</div><div><div class="rev-name">Bilal Mirza</div><div class="rev-role">CTO, CloudBridge</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cta-band">
+    <h2 class="cta-h">Ready to Join<br/>Our Client List?</h2>
+    <p class="cta-sub">Let's build something great together. First call is on us.</p>
+    <button class="btn-acc" onclick="showPage('pricing')" style="margin-right:16px;">View Plans →</button>
+    <a href="mailto:hello@progradeinformatics.com" class="cta-email" style="font-size:16px;">hello@progradeinformatics.com</a>
+  </div>
+</div>
+
+<!-- ==================== NEW SERVICE & CONTACT PAGES ==================== -->
+<div id="page-service-web" class="page">
+  <div class="page-hero">
+    <span class="page-label reveal">Service</span>
+    <h1 class="page-h reveal reveal-d1">Web<br/>Development</h1>
+    <p class="page-sub reveal reveal-d2">Building high-performance, conversion-optimized web applications using React, Next.js, and modern cloud architecture.</p>
+  </div>
+  <div class="services-section">
+    <div class="srv-grid">
+      <div class="srv-card reveal">
+        <div class="srv-icon">💻</div>
+        <div class="srv-name">Custom Web Apps</div>
+        <p class="srv-desc">Tailor-made software solutions built to solve your unique business challenges with scalable architecture.</p>
+      </div>
+      <div class="srv-card reveal reveal-d1">
+        <div class="srv-icon">🛒</div>
+        <div class="srv-name">E-Commerce</div>
+        <p class="srv-desc">Converting shoppers into loyal customers with seamless checkout experiences and robust inventory systems.</p>
+      </div>
+      <div class="srv-card reveal reveal-d2">
+        <div class="srv-icon">⚙️</div>
+        <div class="srv-name">API Integrations</div>
+        <p class="srv-desc">Connecting your tools and automating workflows through secure and efficient third-party API connections.</p>
+      </div>
+    </div>
+  </div>
+  <div class="cta-band">
+    <h2 class="cta-h">Ready to Build Your<br/>Web Application?</h2>
+    <p class="cta-sub">Let's turn your vision into a high-performance reality.</p>
+    <button class="btn-acc" onclick="showPage('contact')">Start a Project →</button>
+  </div>
+</div>
+
+<div id="page-service-marketing" class="page">
+  <div class="page-hero">
+    <span class="page-label reveal">Service</span>
+    <h1 class="page-h reveal reveal-d1">Digital<br/>Marketing</h1>
+    <p class="page-sub reveal reveal-d2">Data-driven growth strategies including SEO, PPC, and Social Media marketing to scale your brand's reach.</p>
+  </div>
+  <div class="services-section">
+    <div class="srv-grid">
+      <div class="srv-card reveal">
+        <div class="srv-icon">📈</div>
+        <div class="srv-name">SEO Mastery</div>
+        <p class="srv-desc">Dominating search results with advanced technical SEO and content strategies that drive organic growth.</p>
+      </div>
+      <div class="srv-card reveal reveal-d1">
+        <div class="srv-icon">📣</div>
+        <div class="srv-name">Social Strategy</div>
+        <p class="srv-desc">Building community and brand authority across all major platforms with engaging storytelling.</p>
+      </div>
+      <div class="srv-card reveal reveal-d2">
+        <div class="srv-icon">💰</div>
+        <div class="srv-name">Paid Advertising</div>
+        <p class="srv-desc">Maximizing ROI with targeted PPC campaigns on Google, Meta, and LinkedIn for immediate results.</p>
+      </div>
+    </div>
+  </div>
+  <div class="cta-band">
+    <h2 class="cta-h">Ready to Scale Your<br/>Online Reach?</h2>
+    <p class="cta-sub">Let's develop a data-driven strategy tailored to your goals.</p>
+    <button class="btn-acc" onclick="showPage('contact')">Get a Free Audit →</button>
+  </div>
+</div>
+
+<div id="page-service-graphic" class="page">
+  <div class="page-hero">
+    <span class="page-label reveal">Service</span>
+    <h1 class="page-h reveal reveal-d1">Graphic<br/>Design</h1>
+    <p class="page-sub reveal reveal-d2">Visual storytelling that captures your brand's essence. From identity design to high-impact marketing assets.</p>
+  </div>
+  <div class="services-section">
+    <div class="srv-grid">
+      <div class="srv-card reveal">
+        <div class="srv-icon">🎨</div>
+        <div class="srv-name">Brand Identity</div>
+        <p class="srv-desc">Creating memorable logos, color palettes, and typography that define your unique brand voice.</p>
+      </div>
+      <div class="srv-card reveal reveal-d1">
+        <div class="srv-icon">✨</div>
+        <div class="srv-name">UI/UX Design</div>
+        <p class="srv-desc">Designing intuitive and beautiful interfaces that prioritize user experience and conversion.</p>
+      </div>
+      <div class="srv-card reveal reveal-d2">
+        <div class="srv-icon">📸</div>
+        <div class="srv-name">Marketing Assets</div>
+        <p class="srv-desc">High-impact visuals for social media, presentations, and print that grab attention instantly.</p>
+      </div>
+    </div>
+  </div>
+  <div class="cta-band">
+    <h2 class="cta-h">Need a Design That<br/>Speaks for Itself?</h2>
+    <p class="cta-sub">Let's craft a visual identity that resonates with your audience.</p>
+    <button class="btn-acc" onclick="showPage('contact')">Talk to a Designer →</button>
+  </div>
+</div>
+
+<div id="page-service-business" class="page">
+  <div class="page-hero">
+    <span class="page-label reveal">Service</span>
+    <h1 class="page-h reveal reveal-d1">Business<br/>Development</h1>
+    <p class="page-sub reveal reveal-d2">Helping you bridge the gap between technology and growth. Strategy, partnerships, and market expansion.</p>
+  </div>
+  <div class="services-section">
+    <div class="srv-grid">
+      <div class="srv-card reveal">
+        <div class="srv-icon">🎯</div>
+        <div class="srv-name">Growth Strategy</div>
+        <p class="srv-desc">Developing data-backed roadmaps to identify new revenue streams and market opportunities.</p>
+      </div>
+      <div class="srv-card reveal reveal-d1">
+        <div class="srv-icon">🤝</div>
+        <div class="srv-name">Partnerships</div>
+        <p class="srv-desc">Connecting you with key industry players and building strategic alliances for mutual growth.</p>
+      </div>
+      <div class="srv-card reveal reveal-d2">
+        <div class="srv-icon">📊</div>
+        <div class="srv-name">Market Research</div>
+        <p class="srv-desc">Deep-dive analysis of your industry and competitors to give you a competitive advantage.</p>
+      </div>
+    </div>
+  </div>
+  <div class="cta-band">
+    <h2 class="cta-h">Ready to Scale Your<br/>Business Operations?</h2>
+    <p class="cta-sub">Bridge the gap between technology and sustainable business growth.</p>
+    <button class="btn-acc" onclick="showPage('contact')">Book a Strategy Call →</button>
+  </div>
+</div>
+
+<div id="page-contact" class="page">
+  <div class="page-hero">
+    <span class="page-label">Get in Touch</span>
+    <h1 class="page-h">Let's Build Your<br/>Digital Future</h1>
+    <p class="page-sub">Ready to start? Reach out to us directly or send an email and our team will get back to you within 24 hours.</p>
+    <div class="contact-box" style="margin-top: 40px; border-left: 2px solid var(--accent); padding-left: 24px;">
+      <div class="contact-email-txt" style="font-size: 24px; font-weight: 700; color: var(--accent); margin-bottom: 8px;">informaticsprograde@gmail.com</div>
+      <div class="contact-tel-txt" style="font-size: 18px; color: var(--white);">+1 (832) 220-8626</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SHARED GLOBAL FOOTER ==================== -->
+<footer>
+  <div class="foot-grid">
+    <div class="foot-brand">
+      <div class="logo" onclick="showPage('home')">Pro<span>Grade</span><sub>Informatics</sub></div>
+      <p class="foot-motto">We build digital futures for brands that refuse to be ordinary. Based globally, working everywhere.</p>
+    </div>
+    <div class="foot-col">
+      <h4>Services</h4>
+      <ul class="foot-list">
+        <li><a onclick="showPage('service-web')">Web Development</a></li>
+        <li><a onclick="showPage('service-marketing')">Digital Marketing</a></li>
+        <li><a onclick="showPage('service-graphic')">Graphic Design</a></li>
+        <li><a onclick="showPage('service-business')">Business Development</a></li>
+      </ul>
+    </div>
+    <div class="foot-col">
+      <h4>Company</h4>
+      <ul class="foot-list">
+        <li><a onclick="showPage('process')">Process</a></li>
+        <li><a onclick="showPage('work')">Work</a></li>
+        <li><a onclick="showPage('clients')">Clients</a></li>
+        <li><a onclick="showPage('pricing')">Pricing</a></li>
+        <li><a onclick="showPage('contact')">Contact</a></li>
+      </ul>
+    </div>
+    <div class="foot-col">
+      <h4>Connect</h4>
+      <ul class="foot-list">
+        <li><a href="#">Instagram</a></li>
+        <li><a href="#">LinkedIn</a></li>
+        <li><a href="#">Dribbble</a></li>
+      </ul>
+      <div class="foot-contact-info">
+        informaticsprograde@gmail.com<br/>
+        +1 (832) 220-8626
+      </div>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <span class="foot-copy">© 2025 PROGRADE. All rights reserved.</span>
+    <div class="foot-socials">
+      <a href="#" class="soc">ig</a>
+      <a href="#" class="soc">in</a>
+      <a href="#" class="soc">dr</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ---- PRELOADER HANDLER ----
+window.addEventListener('load', () => {
+  const loader = document.getElementById('loader-wrapper');
+  setTimeout(() => {
+    loader.classList.add('loaded');
+    document.body.style.overflow = ''; // Restore scroll
+  }, 1200); // 1.2s delay for visual impact
+});
+
+// ---- PAGE ROUTER ----
+const menuToggle = document.getElementById('menu-toggle');
+const navLinks = document.querySelector('.nav-links');
+
+menuToggle.addEventListener('click', () => {
+  menuToggle.classList.toggle('active');
+  navLinks.classList.toggle('open');
+  // Prevent scrolling when menu is open
+  document.body.style.overflow = navLinks.classList.contains('open') ? 'hidden' : '';
+});
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
+  const na=document.getElementById('nav-'+id);
+  // Close mobile menu on page change
+  menuToggle.classList.remove('active');
+  navLinks.classList.remove('open');
+  document.body.style.overflow = '';
+
+  if(na)na.classList.add('active');
+  window.scrollTo({top:0,behavior:'instant'});
+  setTimeout(initReveal,50);
+}
+
+// ---- SCROLL REVEAL ----
+function initReveal(){
+  const els=document.querySelectorAll('.page.active .reveal');
+  const obs=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});
+  },{threshold:0.12});
+  els.forEach(el=>{obs.observe(el);});
+  // Immediately reveal above-fold
+  els.forEach(el=>{
+    const r=el.getBoundingClientRect();
+    if(r.top<window.innerHeight)el.classList.add('visible');
+  });
+}
+
+// ---- NAVBAR SCROLL ----
+window.addEventListener('scroll',()=>{
+  document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>40);
+});
+
+// ---- CURSOR ----
+const cur=document.getElementById('cursor');
+const ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cur.style.left=(mx-5)+'px';cur.style.top=(my-5)+'px';
+});
+(function animRing(){
+  rx+=(mx-rx-19)*0.14;ry+=(my-ry-19)*0.14;
+  ring.style.left=rx+'px';ring.style.top=ry+'px';
+  requestAnimationFrame(animRing);
+})();
+document.querySelectorAll('button,a,[onclick]').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cur.style.transform='scale(2.5)';ring.style.transform='scale(1.5)';});
+  el.addEventListener('mouseleave',()=>{cur.style.transform='scale(1)';ring.style.transform='scale(1)';});
+});
+
+// ---- WORK FILTER ----
+function filterWork(btn,cat){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.w-item').forEach(item=>{
+    if(cat==='all'||item.dataset.cat===cat){
+      item.style.display='block';item.style.animation='fadeUp 0.4s ease both';
+    }else{item.style.display='none';}
+  });
+}
+
+// ---- FAQ ACCORDION ----
+function toggleFaq(el){
+  const ans=el.nextElementSibling;
+  const icon=el.querySelector('.faq-icon');
+  const isOpen=ans.classList.contains('open');
+  document.querySelectorAll('.faq-a.open').forEach(a=>{a.classList.remove('open');a.previousElementSibling.querySelector('.faq-icon').textContent='+';});
+  if(!isOpen){ans.classList.add('open');icon.textContent='−';}
+}
+
+// ---- MOUSE TRACKING HEADERS ----
+document.querySelectorAll('.hero, .page-hero').forEach(section => {
+  section.addEventListener('mousemove', e => {
+    const rect = section.getBoundingClientRect();
+    section.style.setProperty('--m-x', (e.clientX - rect.left) + 'px');
+    section.style.setProperty('--m-y', (e.clientY - rect.top) + 'px');
+  });
+});
+
+// ---- INIT ----
+initReveal();
+</script>
+</body>
+</html>
